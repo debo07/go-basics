@@ -14,6 +14,14 @@ func main() {
 	sb := spanishBot{}
 	printGreeting(eb)
 	printGreeting(sb)
+
+	var b1 bot = englishBot{}
+	fmt.Println("Greetings from b1: ",b1.getGreeting())
+	printGreeting(b1)
+
+	var b2 bot = spanishBot{}
+	fmt.Println("Greetings fron b2: ", b2.getGreeting())
+	printGreeting(b2)
 }
 
 func (eb englishBot) getGreeting() string {
