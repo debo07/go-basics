@@ -12,7 +12,10 @@ func main() {
 
 	// Another way to declare a map
 	var colors1 map[string]string
-	fmt.Println(colors1)
+	fmt.Println("Nil map", colors1)
+	// You can not do the below as it is nil map.
+	// colors1["key"] = "value"
+	// fmt.Println("colors1 map", colors1)
 
 	// Another way to declare a map using make
 	colors2 := make(map[string]string)
