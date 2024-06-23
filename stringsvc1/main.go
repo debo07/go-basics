@@ -13,6 +13,7 @@ import (
 	httptransport "github.com/go-kit/kit/transport/http"
 )
 
+// Layer: Service
 // StringService provides operations on strings.
 type StringService interface {
 	Uppercase(string) (string, error)
@@ -38,6 +39,7 @@ func (stringService) Count(s string) int {
 // ErrEmpty is returned when an input string is empty.
 var ErrEmpty = errors.New("empty string")
 
+// Layer: Transport
 // For each method, we define request and response structs
 type uppercaseRequest struct {
 	S string `json:"s"`
@@ -56,6 +58,30 @@ type countResponse struct {
 	V int `json:"v"`
 }
 
+func decodeUppercaseRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	fmt.Println("Step 2: Decode Request - Uppercase")
+	var request uppercaseRequest
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		return nil, err
+	}
+	return request, nil
+}
+
+func decodeCountRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	fmt.Println("Step 2: Decode Request - Count")
+	var request countRequest
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		return nil, err
+	}
+	return request, nil
+}
+
+func encodeResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {
+	fmt.Println("Step 5: Encode Response - Uppercase/Count")
+	return json.NewEncoder(w).Encode(response)
+}
+
+// Layer: Endpoint
 // Endpoints are a primary abstraction in go-kit. An endpoint represents a single RPC (method in our service interface)
 func makeUppercaseEndpoint(svc StringService) endpoint.Endpoint {
 	fmt.Println("Step 1: Making endpoints - UpperCase")
@@ -80,7 +106,6 @@ func makeCountEndpoint(svc StringService) endpoint.Endpoint {
 	}
 }
 
-// Transports expose the service to the network. In this first example we utilize JSON over HTTP.
 func main() {
 	svc := stringService{}
 
@@ -99,27 +124,4 @@ func main() {
 	http.Handle("/uppercase", uppercaseHandler)
 	http.Handle("/count", countHandler)
 	log.Fatal(http.ListenAndServe(":8080", nil))
-}
-
-func decodeUppercaseRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	fmt.Println("Step 2: Decode Request - Uppercase")
-	var request uppercaseRequest
-	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		return nil, err
-	}
-	return request, nil
-}
-
-func decodeCountRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	fmt.Println("Step 2: Decode Request - Count")
-	var request countRequest
-	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		return nil, err
-	}
-	return request, nil
-}
-
-func encodeResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {
-	fmt.Println("Step 5: Encode Response - Uppercase/Count")
-	return json.NewEncoder(w).Encode(response)
 }
